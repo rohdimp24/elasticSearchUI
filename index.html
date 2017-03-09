@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+
+<style type="text/css">
+em{background-color: yellow}
+
+.button {
+    background: none repeat scroll 0 0 #BF0000;
+    border: 1px solid #BF0000;
+    color: #FFF;
+    padding-top: 10;
+    padding: 5px;
+}
+
+</style>
+
+<link rel="stylesheet" type="text/css" href="Scripts/fonts-min.css" />
+<link rel="stylesheet" type="text/css" href="Scripts/autocomplete/assets/skins/sam/autocomplete.css" />
+<!-- <link rel="stylesheet" type="text/css" href="Scripts/bmtcV2.css" /> -->
+
+<script type="text/javascript" src="Scripts/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="Scripts/connection-min.js"></script>
+<script type="text/javascript" src="Scripts/animation-min.js"></script>
+<script type="text/javascript" src="Scripts/datasource-min.js"></script>
+
+<!-- <script type="text/javascript" src="Scripts/bmtcSearchExtended.js"></script> -->
+<link rel="stylesheet" href="css/jquery.ui.all.css">
+<script src="js/jquery-1.9.1.js"></script>
+<script src="js/jquery.ui.core.js"></script>
+<script src="js/jquery.ui.widget.js"></script>
+<script src="js/jquery.ui.position.js"></script>
+<script src="js/jquery.ui.menu.js"></script>
+<script src="js/jquery.ui.autocomplete.js"></script>
+<link rel="stylesheet" href="css/demos.css">
+<link rel="stylesheet" href="css/bootstrap.css" />
+
+<style>
+	.ui-autocomplete-loading {
+		background: white url('images/ui-anim_basic_16x16.gif') right center no-repeat;
+	}
+	#src,#dest { width: 25em; }
+	.infoWindow {
+    max-width: 250px;
+	}
+	.boldStop
+	{
+		font-size:1.5em;
+		font-weight:bold
+		
+	}
+	#txtSourceAddress,#txtDestinationAddress
+	{
+		width:200px;
+	}
+
+	h3{
+		color:black;
+	}
+	</style>
+<script type="text/javascript" src="Scripts/autocomplete/autocomplete-min.js"></script>
+
+
+<!--<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1c1sWAqiVfYVo2H2uZO3DRSdbZxIVjTSMKDiD-iCCeLYxJJn_BTfNn4DtNyckPujCTOcXysH3Glq9g"
+        type="text/javascript"></script>
+    <script type="text/javascript" src="Scripts/yelpMap.js"> </script>
+-->
+
+</script>
+<script type="text/javascript" src="Scripts/autocomplete/autocomplete-min.js"></script>
+<!--<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=ABQIAAAA1c1sWAqiVfYVo2H2uZO3DRSdbZxIVjTSMKDiD-iCCeLYxJJn_BTfNn4DtNyckPujCTOcXysH3Glq9g"
+        type="text/javascript"></script>-->
+
+<!-- <script src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry"></script>
+<script type="text/javascript" src="Scripts/yelpMap.js"> </script>
+ -->
+
+</head>
+<body>
+
+
+<div id="maincontainer">
+<br/>
+
+<!-- <a href="../ssDashboard.php">Back to dashboard</a> -->
+<H1> Elastic Search Demo </H1><br/>
+
+<div id="SearchForm">
+
+    <form name="myForm" onsubmit="displaySearch(); return false;"> 
+   
+     <!-- <input type="submit" value="Get Quote" />-->
+	<table>
+	<tr>
+	<td>
+	
+	<div class="textBox">
+	 <h3>Search</h3>
+	 </div>
+	 </td>
+	 <td>
+   	<div id="originAutoComplete">		
+		<input id="txtSourceAddress" name="txtSourceAddress" type="text">		
+		<div id="suggestionSourceContainer"></div>
+	  </div>
+	  </td>	  
+  <td>
+  <input class="button" type="submit" value="Search" />
+ <!--  <div class="textBox">
+	<h3> Collocations </h3>
+	</div>
+	</td>
+	<td>
+	<div id="destinationAutoComplete">		
+		<input id="txtDestinationAddress" style="color:#FFFF" name="txtDestinationAddress" type="text">		
+		<div id="suggestionDestContainer"></div>
+	</div>
+	</td>
+	<td>
+ -->	 </td>
+	</tr>
+</table>
+</form>
+<div id="semanticOutput">
+
+</div>
+<script type="text/javascript">
+
+$(function() {
+		function log( message ) {
+			$( "<div>" ).text( message ).prependTo( "#log" );
+			$( "#log" ).scrollTop( 0 );
+		}
+
+		$( "#txtSourceAddress").autocomplete({
+			
+			source: function( request, response ) {
+				$.ajax({
+					type: "GET",
+					//url: "autocomplete.php",
+					url:"http://3.204.155.7:64781/autocomplete/"+request.term,				
+					// data: {
+					// 	query: request.term						
+					// },
+					success: function( data ) {
+							//alert(data);
+							dataset=data.split(';');
+							console.log(data)
+							console.log(dataset.length);							
+							if(dataset.length>0)
+							{
+								response( $.map( dataset, function( item ) {	
+								if(item.length>0) // this will take care of empty list item not to be shown
+									return {
+										//label: item.name + (item.adminName1 ? ", " + item.adminName1 : "") + ", " + item.countryName,
+										value: item
+									}
+								
+							}));
+						}
+					}
+				});
+			},
+			minLength: 1,
+			max:2,
+			delay:1,
+			select: function( event, ui ) {
+				console.log( ui.item ?
+					"Selected: " + ui.item.label :
+					"Nothing selected, input was " + this.value);
+				// populateTable(ui.item.label)
+
+			},
+			open: function() {
+				$( this ).removeClass( "ui-corner-all" ).addClass( "ui-corner-top" );
+			},
+			close: function() {
+				$( this ).removeClass( "ui-corner-top" ).addClass( "ui-corner-all" );
+			}
+		});
+		
+		
+	});
+
+
+
+	function displaySearch(){
+		// alert(window.document.myForm.txtSourceAddress.value);
+		var queryParam=window.document.myForm.txtSourceAddress.value;
+		// console.log("http://3.204.155.7:64781/searchcases/"+encodeURI(queryParam))
+		$.ajax({
+				type: "GET",
+				// url: "elasticSearchData.php",					
+				// data: {
+				// 	query: queryParam						
+				// },
+				url:"http://3.204.155.7:64781/searchcases/"+encodeURI(queryParam),
+				success: function( data ) {
+						var str='<table border="1">'
+						str+='<tr><th>CaseId</th><th>Equipment Type</th><th>Title</th><th>Score</th><th>Matching Text</th></tr>';
+						
+						listObj=jQuery.parseJSON(data);
+						jQuery.each( listObj, function( i, val ) {
+  							str+="<tr>";
+  							str+="<td>"+val["_source"]["id"]+"</td>";
+  							str+="<td>"+val["_source"]["equipmentType"]+"</td>";
+  							str+="<td>"+val["_source"]["title"]+"</td>";
+  							str+="<td>"+val["_score"]+"</td>";
+  							if(val['highlight']==undefined)
+  								str+="<td>"+val["_source"]["details"]+"</td>";  							
+  							else{
+								if(val['highlight']['details']!=undefined)
+									str+="<td>"+val['highlight']['details'].join(" ")+"</td>";
+								else if(val['highlight']['title']!=undefined)
+									str+="<td>"+val['highlight']['title'].join(" ")+"</td>";
+							}
+  					
+
+  							str+="</tr>";
+						});
+						// for(i=0;i<5;i++)
+						// {
+						// 	console.log(data[i]->_source->title);
+						// }
+						// foreach(data as $obj){
+						// // 	print_r($obj->_source->title);
+						// // 	echo "<br/>";
+						// }
+
+
+						str+="</table>";
+
+						$('#semanticOutput').html(str);
+
+				}
+			});
+
+	}
+
+</script>
+
+
+
+
+<!-- </form> -->
+
+
+
+
+
+
+</body>
+</html>
+
